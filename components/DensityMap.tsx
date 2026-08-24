@@ -5,10 +5,11 @@ import type {
   FillLayerSpecification,
   StyleSpecification,
 } from "maplibre-gl";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Map, {
   Popup,
   type MapLayerMouseEvent,
+  type MapRef,
 } from "react-map-gl/maplibre";
 
 import type { DensityRow } from "@/lib/types";
@@ -123,21 +124,21 @@ export default function DensityMap({ rows }: DensityMapProps) {
     };
   }, [geometry, rows]);
 
-  const mapStyle = useMemo<StyleSpecification>(() => {
-    if (!enrichedGeometry) {
-      return baseMapStyle;
+  const mapRef = useRef<MapRef>(null);
+  const installDensityLayer = useCallback(() => {
+    const map = mapRef.current?.getMap();
+    if (!map || !enrichedGeometry) {
+      return;
     }
-    return {
-      ...baseMapStyle,
-      sources: {
-        ...baseMapStyle.sources,
-        "zip-density": {
-          type: "geojson",
-          data: enrichedGeometry,
-        },
-      },
-      layers: [...baseMapStyle.layers, fillLayer],
-    };
+    if (!map.getSource("zip-density")) {
+      map.addSource("zip-density", {
+        type: "geojson",
+        data: enrichedGeometry,
+      });
+    }
+    if (!map.getLayer(fillLayer.id)) {
+      map.addLayer(fillLayer);
+    }
   }, [enrichedGeometry]);
 
   const handleMouseMove = (event: MapLayerMouseEvent) => {
@@ -171,9 +172,11 @@ export default function DensityMap({ rows }: DensityMapProps) {
           zoom: 9.25,
         }}
         interactiveLayerIds={["zip-density-fill"]}
-        mapStyle={mapStyle}
+        mapStyle={baseMapStyle}
+        onLoad={installDensityLayer}
         onMouseLeave={() => setHovered(null)}
         onMouseMove={handleMouseMove}
+        ref={mapRef}
       >
         {hovered ? (
           <Popup
