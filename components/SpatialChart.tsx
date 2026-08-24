@@ -11,7 +11,7 @@ export default function SpatialChart({ rows }: SpatialChartProps) {
   const height = 430;
   const left = 76;
   const right = 34;
-  const top = 76;
+  const top = 105;
   const bottom = 62;
   const plotWidth = width - left - right;
   const plotHeight = height - top - bottom;

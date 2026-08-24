@@ -1,7 +1,10 @@
 "use client";
 
 import type { FeatureCollection, GeoJsonProperties, Geometry } from "geojson";
-import type { FillLayerSpecification } from "maplibre-gl";
+import type {
+  FillLayerSpecification,
+  StyleSpecification,
+} from "maplibre-gl";
 import { useEffect, useMemo, useState } from "react";
 import Map, {
   Layer,
@@ -46,6 +49,31 @@ const fillLayer: FillLayerSpecification = {
     "fill-opacity": 0.78,
     "fill-outline-color": "#ffffff",
   },
+};
+
+const baseMapStyle: StyleSpecification = {
+  version: 8,
+  sources: {
+    cartoLight: {
+      type: "raster",
+      tiles: [
+        "https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png",
+        "https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png",
+        "https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png",
+      ],
+      tileSize: 512,
+      attribution: "© OpenStreetMap contributors © CARTO",
+    },
+  },
+  layers: [
+    {
+      id: "carto-light",
+      type: "raster",
+      source: "cartoLight",
+      minzoom: 0,
+      maxzoom: 20,
+    },
+  ],
 };
 
 export default function DensityMap({ rows }: DensityMapProps) {
@@ -128,7 +156,7 @@ export default function DensityMap({ rows }: DensityMapProps) {
           zoom: 9.25,
         }}
         interactiveLayerIds={["zip-density-fill"]}
-        mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+        mapStyle={baseMapStyle}
         onMouseLeave={() => setHovered(null)}
         onMouseMove={handleMouseMove}
         reuseMaps

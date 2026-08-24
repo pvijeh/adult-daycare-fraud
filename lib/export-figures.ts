@@ -9,7 +9,12 @@ function downloadBlob(blob: Blob, filename: string) {
 
 function serializeSvg(svg: SVGSVGElement): string {
   const clone = svg.cloneNode(true) as SVGSVGElement;
+  const viewBox = svg.viewBox.baseVal;
   clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+  if (viewBox.width && viewBox.height) {
+    clone.setAttribute("width", String(viewBox.width));
+    clone.setAttribute("height", String(viewBox.height));
+  }
   return new XMLSerializer().serializeToString(clone);
 }
 
@@ -24,15 +29,15 @@ async function exportPng(svgMarkup: string, filename: string) {
   });
   const scale = 2;
   const canvas = document.createElement("canvas");
-  canvas.width = image.width * scale;
-  canvas.height = image.height * scale;
+  canvas.width = image.naturalWidth * scale;
+  canvas.height = image.naturalHeight * scale;
   const context = canvas.getContext("2d");
   if (!context) {
     URL.revokeObjectURL(url);
     throw new Error("Canvas export is unavailable.");
   }
   context.scale(scale, scale);
-  context.drawImage(image, 0, 0);
+  context.drawImage(image, 0, 0, image.naturalWidth, image.naturalHeight);
   URL.revokeObjectURL(url);
   const png = await new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
