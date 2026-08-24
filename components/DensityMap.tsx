@@ -7,9 +7,7 @@ import type {
 } from "maplibre-gl";
 import { useEffect, useMemo, useState } from "react";
 import Map, {
-  Layer,
   Popup,
-  Source,
   type MapLayerMouseEvent,
 } from "react-map-gl/maplibre";
 
@@ -125,6 +123,23 @@ export default function DensityMap({ rows }: DensityMapProps) {
     };
   }, [geometry, rows]);
 
+  const mapStyle = useMemo<StyleSpecification>(() => {
+    if (!enrichedGeometry) {
+      return baseMapStyle;
+    }
+    return {
+      ...baseMapStyle,
+      sources: {
+        ...baseMapStyle.sources,
+        "zip-density": {
+          type: "geojson",
+          data: enrichedGeometry,
+        },
+      },
+      layers: [...baseMapStyle.layers, fillLayer],
+    };
+  }, [enrichedGeometry]);
+
   const handleMouseMove = (event: MapLayerMouseEvent) => {
     const feature = event.features?.[0];
     if (!feature) {
@@ -156,14 +171,10 @@ export default function DensityMap({ rows }: DensityMapProps) {
           zoom: 9.25,
         }}
         interactiveLayerIds={["zip-density-fill"]}
-        mapStyle={baseMapStyle}
+        mapStyle={mapStyle}
         onMouseLeave={() => setHovered(null)}
         onMouseMove={handleMouseMove}
-        reuseMaps
       >
-        <Source data={enrichedGeometry} id="zip-density" type="geojson">
-          <Layer {...fillLayer} />
-        </Source>
         {hovered ? (
           <Popup
             anchor="bottom"

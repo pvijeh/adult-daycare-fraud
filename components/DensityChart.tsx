@@ -15,7 +15,7 @@ export default function DensityChart({ rows }: DensityChartProps) {
     1,
   );
   const chartWidth = 760;
-  const chartHeight = 390;
+  const chartHeight = 430;
   const plotLeft = 76;
   const plotWidth = 620;
   const barHeight = 23;
