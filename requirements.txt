@@ -1,11 +1,5 @@
-duckdb>=0.10.0
-pandas>=2.1.0
-numpy>=1.26.0
-networkx>=3.2.0
-requests>=2.31.0
-pydantic>=2.5.0
-streamlit>=1.32.0
-pydeck>=0.8.0
-plotly>=5.18.0
-kaleido>=0.2.1
-pytest>=8.0.0
+networkx==3.5
+psycopg[binary]==3.2.9
+pydantic==2.11.7
+pytest==8.4.1
+requests==2.32.4

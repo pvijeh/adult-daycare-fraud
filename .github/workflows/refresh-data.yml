@@ -1,0 +1,40 @@
+name: Refresh investigation data
+
+on:
+  schedule:
+    - cron: "17 9 * * 1"
+  workflow_dispatch:
+    inputs:
+      use_mock:
+        description: Use deterministic NPPES fixtures
+        required: true
+        default: false
+        type: boolean
+
+concurrency:
+  group: refresh-investigation-data
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SOCRATA_APP_TOKEN: ${{ secrets.SOCRATA_APP_TOKEN }}
+      USE_MOCK_NPPES: ${{ inputs.use_mock || 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install pipeline dependencies
+        run: python -m pip install --requirement requirements.txt
+      - name: Validate configuration
+        run: test -n "$DATABASE_URL" || (echo "DATABASE_URL repository secret is required." && exit 1)
+      - name: Refresh public datasets and analysis
+        run: python -m pipeline.run

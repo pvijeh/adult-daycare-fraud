@@ -2,7 +2,11 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
+node_modules/
+.next/
+out/
+.env
+.env.local
+*.tsbuildinfo
+npm-debug.log*
 data/*.duckdb
-data/*.wal
-exports/*.png
-exports/*.svg
