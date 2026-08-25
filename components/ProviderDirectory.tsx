@@ -5,12 +5,12 @@ import { useMemo, useState } from "react";
 
 import type {
   EvidenceLabel,
-  ProviderDirectoryData,
+  ProviderDirectoryListData,
 } from "@/lib/provider-types";
 
 
 type ProviderDirectoryProps = {
-  data: ProviderDirectoryData;
+  data: ProviderDirectoryListData;
 };
 
 const labelOptions: EvidenceLabel[] = [

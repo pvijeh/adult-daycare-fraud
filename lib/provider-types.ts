@@ -73,6 +73,27 @@ export type ProviderDirectoryData = {
   exclusionCount: number;
 };
 
+export type ProviderDirectoryListEntry = Pick<
+  ProviderDirectoryEntry,
+  | "dftaId"
+  | "programName"
+  | "sponsorName"
+  | "address"
+  | "zipCode"
+  | "borough"
+  | "phone"
+> & {
+  npiMatch: Pick<NpiMatch, "npi" | "confidence">;
+  flags: Array<Pick<ProviderFlag, "id" | "label" | "severity">>;
+};
+
+export type ProviderDirectoryListData = Omit<
+  ProviderDirectoryData,
+  "providers"
+> & {
+  providers: ProviderDirectoryListEntry[];
+};
+
 export type PropertyRecord = {
   address: string;
   ownerName: string;

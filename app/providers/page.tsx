@@ -1,13 +1,12 @@
 import Link from "next/link";
 
 import ProviderDirectory from "@/components/ProviderDirectory";
-import { getProviderDirectory } from "@/lib/provider-data";
-
+import { getProviderDirectoryList } from "@/lib/provider-data";
 
 export const dynamic = "force-dynamic";
 
 export default async function ProvidersPage() {
-  const data = await getProviderDirectory();
+  const data = await getProviderDirectoryList();
 
   return (
     <main>

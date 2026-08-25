@@ -9,6 +9,7 @@ import type {
   PropertyRecord,
   ProviderDirectoryData,
   ProviderDirectoryEntry,
+  ProviderDirectoryListData,
   ProviderDossier,
   ProviderFlag,
 } from "@/lib/provider-types";
@@ -853,6 +854,33 @@ export const getProviderDirectory = cache(
       );
       return demoProviderDirectory;
     }
+  },
+);
+
+export const getProviderDirectoryList = cache(
+  async (): Promise<ProviderDirectoryListData> => {
+    const directory = await getProviderDirectory();
+    return {
+      ...directory,
+      providers: directory.providers.map((provider) => ({
+        dftaId: provider.dftaId,
+        programName: provider.programName,
+        sponsorName: provider.sponsorName,
+        address: provider.address,
+        zipCode: provider.zipCode,
+        borough: provider.borough,
+        phone: provider.phone,
+        npiMatch: {
+          npi: provider.npiMatch.npi,
+          confidence: provider.npiMatch.confidence,
+        },
+        flags: provider.flags.map((flag) => ({
+          id: flag.id,
+          label: flag.label,
+          severity: flag.severity,
+        })),
+      })),
+    };
   },
 );
 
