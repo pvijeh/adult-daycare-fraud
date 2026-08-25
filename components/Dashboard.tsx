@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import DensityChart from "@/components/DensityChart";
@@ -108,6 +109,9 @@ export default function Dashboard({ data }: DashboardProps) {
             <button className="export-button" onClick={handleExport} type="button">
               {exportState}
             </button>
+            <Link className="provider-button" href="/providers">
+              Browse provider dossiers
+            </Link>
           </aside>
         </div>
       </section>
