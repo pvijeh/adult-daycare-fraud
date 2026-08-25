@@ -50,6 +50,17 @@ export default function Dashboard({ data }: DashboardProps) {
       data.clusters[0],
     [data.clusters, selectedClusterId],
   );
+  const rankedDensity = useMemo(
+    () =>
+      [...data.density].sort((left, right) => {
+        const leftRate =
+          left.providersPerThousandSeniors ?? Number.NEGATIVE_INFINITY;
+        const rightRate =
+          right.providersPerThousandSeniors ?? Number.NEGATIVE_INFINITY;
+        return rightRate - leftRate || left.zcta.localeCompare(right.zcta);
+      }),
+    [data.density],
+  );
 
   const handleExport = async () => {
     setExportState("Exporting…");
@@ -149,7 +160,7 @@ export default function Dashboard({ data }: DashboardProps) {
                 </div>
               </div>
               <div className="panel chart-panel">
-                <DensityChart rows={data.density} />
+                <DensityChart rows={rankedDensity} />
               </div>
             </div>
             <div className="table-wrap">
@@ -159,11 +170,11 @@ export default function Dashboard({ data }: DashboardProps) {
                     <th>ZIP code</th>
                     <th>Providers</th>
                     <th>Residents 65+</th>
-                    <th>Per 1,000 seniors</th>
+                    <th aria-sort="descending">Per 1,000 seniors ↓</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {data.density.slice(0, 10).map((row) => (
+                  {rankedDensity.slice(0, 10).map((row) => (
                     <tr key={row.zcta}>
                       <td>{row.zcta}</td>
                       <td>{row.providerCount}</td>
