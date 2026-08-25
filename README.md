@@ -20,7 +20,8 @@ PLUTO ─┘                │
 ```
 
 - **Next.js + TypeScript:** server-side Postgres reads, MapLibre ZIP choropleth,
-  interactive investigation views, and browser-side PNG/SVG exports.
+  interactive investigation views, provider dossiers, and browser-side PNG/SVG
+  exports.
 - **Python 3.11:** API ingestion, deterministic NPPES fallback fixtures,
   normalization, and NetworkX connected-component analysis.
 - **Postgres:** durable provider, demographic, property, graph, and pipeline-run
@@ -35,8 +36,11 @@ illustrative records. Those records are visibly labeled and are not findings.
 | Source | Use |
 | --- | --- |
 | [NPPES NPI Registry](https://npiregistry.cms.hhs.gov/api-page) | Organizations, authorized officials, phones, and practice addresses |
+| [NYC Aging SADC registry](https://data.cityofnewyork.us/City-Government/Department-for-the-Aging-NYC-Aging-Social-Adult-Da/32cj-z7va) | Canonical current facility directory, sponsor identity, address, phone, BIN, and BBL |
+| [NYS OMIG exclusions](https://omig.ny.gov/medicaid-exclusions) | Exact entity-name and NPI exclusion records |
 | [2022 ACS 5-year API](https://www.census.gov/data/developers/data-sets/acs-5year.html) | Total and age-65+ population by ZCTA |
 | [NYC PLUTO](https://data.cityofnewyork.us/Housing-Development/Primary-Land-Use-Tax-Lot-Output-PLUTO-/64uk-42ks) | Building area, commercial area, class, and owner |
+| [DOB NOW Certificates of Occupancy](https://data.cityofnewyork.us/Housing-Development/DOB-NOW-Certificate-of-Occupancy/pkdm-hqz6) | Certificate filing and issuance metadata |
 | [NYC modified ZIP boundaries](https://data.cityofnewyork.us/Business/Modified-Zip-Code-Tabulation-Areas-MODZCTA-/pri4-ifjk) | Lightweight dashboard geometry |
 
 The output is a lead-generation tool, not a determination of fraud. Entity
@@ -150,6 +154,9 @@ reuse a connection string belonging to another application.
    connected components with two or more provider nodes.
 3. **Spatial sanity check** — commercial area against distinct licenses for
    PLUTO-matched addresses with three or more provider registrations.
+4. **Provider dossiers** — searchable NYC Aging facilities with deterministic
+   NPPES reconciliation, exact OMIG exclusion matches, property and certificate
+   metadata, source provenance, limitations, and a visible human-review gate.
 
 The export control downloads each visible story chart as both SVG and
 high-resolution PNG in the browser.
