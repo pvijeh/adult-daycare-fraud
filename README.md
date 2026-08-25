@@ -88,8 +88,10 @@ USE_MOCK_NPPES=true python -m pipeline.run
 ```
 
 NPPES failures automatically fall back to 50 deterministic records so graph
-and storage stages can still execute. Census and PLUTO failures remain fatal to
-avoid publishing partially refreshed demographic or property results.
+and storage stages can still execute. Census requests use `CENSUS_API_KEY` when
+available and otherwise fall back to the official ACS table-based summary file.
+Census and PLUTO failures remain fatal to avoid publishing partially refreshed
+demographic or property results.
 
 Tests:
 

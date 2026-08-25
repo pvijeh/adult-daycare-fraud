@@ -1,7 +1,13 @@
 import pytest
 import requests
 
-from pipeline.census import parse_census_rows
+from pipeline import census
+from pipeline.census import (
+    BULK_SENIOR_FIELDS,
+    BULK_TOTAL_POPULATION_FIELD,
+    parse_census_bulk_lines,
+    parse_census_rows,
+)
 from pipeline.graph import build_provider_graph, find_provider_clusters
 from pipeline.normalize import standardize_address
 from pipeline.nppes import (
@@ -64,6 +70,62 @@ def test_census_parser_sums_senior_bands_and_filters_to_new_york():
             "senior_pop_65_plus": 120,
         }
     ]
+
+
+def test_census_bulk_parser_sums_senior_bands_and_filters_to_new_york():
+    headers = [
+        "GEO_ID",
+        BULK_TOTAL_POPULATION_FIELD,
+        *BULK_SENIOR_FIELDS,
+    ]
+    ny_row = ["860Z200US11201", "1000", *["10"] * 12]
+    california_row = ["860Z200US90210", "2000", *["20"] * 12]
+
+    parsed = parse_census_bulk_lines(
+        [
+            "|".join(headers),
+            "|".join(ny_row),
+            "|".join(california_row),
+        ]
+    )
+
+    assert parsed == [
+        {
+            "zcta": "11201",
+            "total_population": 1000,
+            "senior_pop_65_plus": 120,
+        }
+    ]
+
+
+class MissingKeyResponse:
+    def raise_for_status(self):
+        return None
+
+    def json(self):
+        raise ValueError("Census returned the missing-key HTML page")
+
+
+def test_census_api_failure_uses_official_bulk_fallback(monkeypatch):
+    expected = [
+        {
+            "zcta": "11201",
+            "total_population": 1000,
+            "senior_pop_65_plus": 120,
+        }
+    ]
+    monkeypatch.setattr(
+        census.requests,
+        "get",
+        lambda *args, **kwargs: MissingKeyResponse(),
+    )
+    monkeypatch.setattr(
+        census,
+        "fetch_census_bulk_demographics",
+        lambda timeout: expected,
+    )
+
+    assert census.fetch_census_demographics() == expected
 
 
 def test_graph_clusters_shared_entities_and_ignores_placeholder_phones():
