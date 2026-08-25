@@ -1,4 +1,5 @@
 import os
+import re
 from collections.abc import Iterable
 
 import requests
@@ -10,6 +11,7 @@ from pipeline.normalize import standardize_address
 PLUTO_ENDPOINT = "https://data.cityofnewyork.us/resource/64uk-42ks.json"
 PAGE_SIZE = 50_000
 ZIP_BATCH_SIZE = 25
+ZIP_CODE_PATTERN = re.compile(r"^\d{5}$")
 
 
 class PlutoApiRow(BaseModel):
@@ -36,6 +38,18 @@ def _chunks(values: list[str], size: int) -> Iterable[list[str]]:
         yield values[index : index + size]
 
 
+def _validated_zip_codes(zip_codes: list[str]) -> list[str]:
+    unique_zip_codes = sorted(set(zip_codes))
+    invalid_zip_codes = [
+        zip_code
+        for zip_code in unique_zip_codes
+        if not ZIP_CODE_PATTERN.fullmatch(zip_code)
+    ]
+    if invalid_zip_codes:
+        raise ValueError("PLUTO ZIP codes must contain exactly five digits.")
+    return unique_zip_codes
+
+
 def fetch_pluto_parcels(
     zip_codes: list[str],
     timeout: int = 60,
@@ -45,7 +59,7 @@ def fetch_pluto_parcels(
     if app_token := os.environ.get("SOCRATA_APP_TOKEN"):
         headers["X-App-Token"] = app_token
 
-    for zip_batch in _chunks(sorted(set(zip_codes)), ZIP_BATCH_SIZE):
+    for zip_batch in _chunks(_validated_zip_codes(zip_codes), ZIP_BATCH_SIZE):
         quoted = ", ".join(f"'{zip_code}'" for zip_code in zip_batch)
         offset = 0
         while True:

@@ -1,3 +1,4 @@
+import pytest
 import requests
 
 from pipeline.census import parse_census_rows
@@ -8,6 +9,7 @@ from pipeline.nppes import (
     fetch_nppes_records,
     generate_mock_records,
 )
+from pipeline.pluto import fetch_pluto_parcels
 
 
 def test_address_standardization_removes_units_and_normalizes_suffixes():
@@ -95,3 +97,11 @@ def test_graph_clusters_shared_entities_and_ignores_placeholder_phones():
     assert "PHONE:0000000000" not in graph
     assert len(clusters) == 1
     assert clusters[0]["provider_count"] == 2
+
+
+def test_pluto_rejects_zip_codes_that_are_not_five_digits():
+    with pytest.raises(
+        ValueError,
+        match="PLUTO ZIP codes must contain exactly five digits.",
+    ):
+        fetch_pluto_parcels(["11201", "11201') OR 1=1 --"])
