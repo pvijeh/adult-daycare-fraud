@@ -7,9 +7,63 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
+const SVG_STYLE_PROPERTIES = [
+  "color",
+  "display",
+  "dominant-baseline",
+  "fill",
+  "fill-opacity",
+  "fill-rule",
+  "font-family",
+  "font-size",
+  "font-style",
+  "font-variant",
+  "font-weight",
+  "letter-spacing",
+  "opacity",
+  "paint-order",
+  "shape-rendering",
+  "stop-color",
+  "stop-opacity",
+  "stroke",
+  "stroke-dasharray",
+  "stroke-dashoffset",
+  "stroke-linecap",
+  "stroke-linejoin",
+  "stroke-miterlimit",
+  "stroke-opacity",
+  "stroke-width",
+  "text-anchor",
+  "text-decoration",
+  "text-rendering",
+  "vector-effect",
+  "visibility",
+  "word-spacing",
+] as const;
+
+function inlineComputedStyles(source: SVGSVGElement, target: SVGSVGElement) {
+  const sourceElements = [
+    source,
+    ...source.querySelectorAll<SVGElement>("*"),
+  ];
+  const targetElements = [
+    target,
+    ...target.querySelectorAll<SVGElement>("*"),
+  ];
+
+  sourceElements.forEach((element, index) => {
+    const computed = window.getComputedStyle(element);
+    const targetElement = targetElements[index];
+    for (const property of SVG_STYLE_PROPERTIES) {
+      targetElement.style.setProperty(property, computed.getPropertyValue(property));
+    }
+  });
+}
+
 function serializeSvg(svg: SVGSVGElement): string {
   const clone = svg.cloneNode(true) as SVGSVGElement;
   const viewBox = svg.viewBox.baseVal;
+  inlineComputedStyles(svg, clone);
   clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
   if (viewBox.width && viewBox.height) {
     clone.setAttribute("width", String(viewBox.width));
