@@ -3,6 +3,10 @@ import "server-only";
 import { cache } from "react";
 
 import { demoProviderDirectory } from "@/lib/demo-providers";
+import {
+  validateBbl,
+  validateBin,
+} from "@/lib/municipal-identifiers";
 import type {
   CertificateMetadata,
   NpiMatch,
@@ -885,14 +889,15 @@ export const getProviderDirectoryList = cache(
 );
 
 async function fetchProperty(bbl: string): Promise<PropertyRecord | null> {
-  if (!bbl) {
+  const validatedBbl = validateBbl(bbl);
+  if (!validatedBbl) {
     return null;
   }
   const params = new URLSearchParams({
     "$limit": "1",
     "$select":
       "address,ownername,bldgclass,bldgarea,comarea,numfloors,unitsres,unitstotal,yearbuilt",
-    "$where": `bbl='${bbl.replace(/'/g, "''")}'`,
+    bbl: validatedBbl,
   });
   const rows = await fetchSocrataJson<
     Array<Record<string, string | undefined>>
@@ -917,19 +922,19 @@ async function fetchProperty(bbl: string): Promise<PropertyRecord | null> {
 async function fetchCertificateMetadata(
   bin: string,
 ): Promise<CertificateMetadata | null> {
-  if (!bin) {
+  const validatedBin = validateBin(bin);
+  if (!validatedBin) {
     return null;
   }
-  const escapedBin = bin.replace(/'/g, "''");
   const currentParams = new URLSearchParams({
     "$limit": "500",
     "$select": "c_of_o_status,c_of_o_issuance_date",
-    "$where": `bin='${escapedBin}'`,
+    bin: validatedBin,
   });
   const historicalParams = new URLSearchParams({
     "$limit": "5000",
     "$select": "c_o_issue_date,application_status_raw,filing_status_raw",
-    "$where": `bin_number='${escapedBin}'`,
+    bin_number: validatedBin,
   });
   const [currentRows, historicalRows] = await Promise.all([
     fetchSocrataJson<Array<Record<string, string | undefined>>>(

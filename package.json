@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "test:identifiers": "tsc --module node16 --moduleResolution node16 --target es2022 --outDir .test-build --noEmit false --incremental false --esModuleInterop true tests/municipal-identifiers.test.ts lib/municipal-identifiers.ts && node --test .test-build/tests/municipal-identifiers.test.js",
     "typecheck": "tsc --noEmit",
     "test:python": "python -m pytest -q"
   },
