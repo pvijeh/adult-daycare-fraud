@@ -23,7 +23,7 @@ const NPPES_URL = "https://npiregistry.cms.hhs.gov/api/";
 const NPPES_SOURCE = "https://npiregistry.cms.hhs.gov/";
 const OMIG_EXCLUSIONS_URL =
   "https://apps.omig.ny.gov/exclusions/tabdelimited.aspx";
-const OMIG_SOURCE = "https://omig.ny.gov/medicaid-exclusions";
+const OMIG_SOURCE = "https://omig.ny.gov/medicaid-fraud/medicaid-exclusions";
 const PLUTO_URL = "https://data.cityofnewyork.us/resource/64uk-42ks.json";
 const PLUTO_SOURCE =
   "https://data.cityofnewyork.us/Housing-Development/Primary-Land-Use-Tax-Lot-Output-PLUTO-/64uk-42ks";
