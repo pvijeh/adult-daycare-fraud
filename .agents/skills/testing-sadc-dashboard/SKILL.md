@@ -132,6 +132,49 @@ description: How to run and runtime-test the "Ghosts in the Grid" SADC investiga
   with 10 rows the max rect bottom is 402 and max text y is 395 — fine in the current 430-tall viewBox,
   clipped in the old 390-tall one. Also eyeball the bottom row (`11373 / 0.55` in demo data).
 
+## Provider directory / dossiers (`/providers`, `/providers/[dftaId]`)
+- These routes are `force-dynamic` and read LIVE public sources at request time
+  (NYC Aging `32cj-z7va`, NPPES `npiregistry.cms.hhs.gov/api/`, OMIG
+  `apps.omig.ny.gov/exclusions/tabdelimited.aspx`, plus PLUTO `64uk-42ks` and DOB
+  `pkdm-hqz6` / `9r28-dr8b` per dossier). They do NOT use Postgres, so no container is needed —
+  just `env -u DATABASE_URL npx next start`. Keep `SOCRATA_APP_TOKEN` set (the anonymous-retry
+  path is the one that works).
+- Live fingerprint (values drift as the public data changes — re-derive with `curl`, do not hardcode
+  in assertions blindly): registry ~359 facilities, ~1,198 NPPES records and ~9,023 OMIG exclusions
+  compared, 3 `enforcement record` facilities, all APNA (`S34801`, `S52401`, `S266301`).
+  `S266301` is the best dossier specimen: high-confidence NPI `1841167855`, exact OMIG name match,
+  PLUTO owner + `S4` class, and 2 related facilities.
+- The directory filter is CLIENT-side over a payload that does not render phone or NPI, so searching
+  `718-513-4822` (phone) and `1841167855` (NPI) is the only way to prove those fields are in the
+  search index. `normalize()` strips non-word chars, so `718-513-4822` and `718 513 4822` both match.
+  CLEAR the search box between queries — the browser `type` action appends, which silently produces
+  a 0-result "failure" that is really a test bug.
+- Borough + evidence-label filters must AND: BROOKLYN + `enforcement record` → 3, BRONX +
+  `enforcement record` → 0. If a filtered count equals the unfiltered total, one filter is ignored.
+- Forcing the labeled demo fallback WITHOUT touching app code: `HTTPS_PROXY` does not work (Next 16
+  fetch ignores it). Use a preload that rejects `fetch` to the source hosts:
+  ```js
+  // /tmp/block-sources.js  (TEST HARNESS ONLY)
+  const blocked = ["data.cityofnewyork.us","npiregistry.cms.hhs.gov","apps.omig.ny.gov"];
+  const real = globalThis.fetch;
+  globalThis.fetch = (input, init) => {
+    const url = typeof input === "string" ? input : (input && input.url) || "";
+    return blocked.some((h) => url.includes(h))
+      ? Promise.reject(new Error("TEST HARNESS: simulated outage for " + url))
+      : real(input, init);
+  };
+  ```
+  then `NODE_OPTIONS=--require /tmp/block-sources.js env -u DATABASE_URL npx next start -p 3001`.
+  Expected: yellow `Demonstration dossiers.` banner, `Current registry 2`, rows `DEMO-001`/`DEMO-002`,
+  `/providers/DEMO-001` labeled `Demonstration dossier.` with PLUTO `No property match` and DOB
+  `Requires records`, and real IDs like `/providers/S266301` returning 404. The fallback server log
+  legitimately contains `Provider public-data query failed; using demonstration dossiers.` with a
+  stack — that line in the LIVE log would be a real defect.
+- Unknown IDs (`/providers/S999999`) must render Next's `404 / This page could not be found.`, never a
+  blank dossier shell or a 500.
+- Mobile: emulation reports ~410 px wide. Check `document.documentElement.scrollWidth ===
+  clientWidth` on both the directory and a dossier to prove there is no horizontal overflow.
+
 ## Devin Secrets Needed
 - `SOCRATA_APP_TOKEN` (already injected; currently rejected by NYC Open Data — keep it set when
   testing the geometry route so the anonymous-retry path is exercised).
