@@ -37,7 +37,7 @@ illustrative records. Those records are visibly labeled and are not findings.
 | --- | --- |
 | [NPPES NPI Registry](https://npiregistry.cms.hhs.gov/api-page) | Organizations, authorized officials, phones, and practice addresses |
 | [NYC Aging SADC registry](https://data.cityofnewyork.us/City-Government/Department-for-the-Aging-NYC-Aging-Social-Adult-Da/32cj-z7va) | Canonical current facility directory, sponsor identity, address, phone, BIN, and BBL |
-| [NYS OMIG exclusions](https://omig.ny.gov/medicaid-exclusions) | Exact entity-name and NPI exclusion records |
+| [NYS OMIG exclusions](https://omig.ny.gov/medicaid-fraud/medicaid-exclusions) | Exact entity-name and NPI exclusion records |
 | [2022 ACS 5-year API](https://www.census.gov/data/developers/data-sets/acs-5year.html) | Total and age-65+ population by ZCTA |
 | [NYC PLUTO](https://data.cityofnewyork.us/Housing-Development/Primary-Land-Use-Tax-Lot-Output-PLUTO-/64uk-42ks) | Building area, commercial area, class, and owner |
 | [DOB NOW Certificates of Occupancy](https://data.cityofnewyork.us/Housing-Development/DOB-NOW-Certificate-of-Occupancy/pkdm-hqz6) | Certificate filing and issuance metadata |
@@ -45,6 +45,15 @@ illustrative records. Those records are visibly labeled and are not findings.
 
 The output is a lead-generation tool, not a determination of fraud. Entity
 links and spatial anomalies need source-document review and reporting.
+
+## Research documentation
+
+- [NYC Social Adult Day Care data sources](docs/DATA_SOURCES.md) — availability,
+  join keys, limitations, project status, and suitability for detecting or
+  corroborating possible fraud.
+- [NYC Social Adult Day Care industry primer](docs/NYC_SADC_INDUSTRY.md) —
+  services, oversight, payment and identity relationships, investigative
+  typologies, and evidence-safe publication rules.
 
 ## Local frontend
 
