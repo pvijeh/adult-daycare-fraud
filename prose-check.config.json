@@ -1,0 +1,4 @@
+{
+  "include": ["README.md", "app", "components"],
+  "exclude": []
+}
