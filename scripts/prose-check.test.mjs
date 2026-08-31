@@ -158,3 +158,14 @@ test("checks copy written as JSX text, not only string literals", () => {
   assert.ok(findings.some((f) => f.message.includes('"landscape"')));
   assert.deepEqual(findings.filter((f) => f.message.includes("limit 45")), []);
 });
+
+test("markup inside a literal separates labels instead of making one long sentence", () => {
+  const label = Array.from({ length: 12 }, (_, i) => `word${i}`).join(" ");
+  const source = "export const chart = `<svg><title>" + label + "</title><text>" + label + "</text><text>" + label + "</text></svg>`;";
+  assert.deepEqual(check(source, "charts.ts").filter((f) => f.message.includes("limit 45")), []);
+});
+
+test("ignores coordinate and path data", () => {
+  const source = 'export const icon = "M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.06-.72.08-.7.08-.7 1.17.08";';
+  assert.deepEqual(check(source, "Icons.tsx"), []);
+});

@@ -20,6 +20,7 @@ const SKIP_DIR = new Set([
   "node_modules",
   ".git",
   ".next",
+  "out",
   "dist",
   "build",
   "coverage",
@@ -106,7 +107,9 @@ function codeParagraphs(source) {
     const text = raw
       .slice(1, -1)
       .replace(/\\(.)/g, "$1")
-      .replace(/<[^>]+>/g, " ");
+      // A tag ends whatever text preceded it: markup inside a literal (inline SVG,
+      // an HTML snippet) holds separate labels, not one long sentence.
+      .replace(/<[^>]+>/g, ". ");
     const startLine = index.at(match.index);
     const endLine = index.at(match.index + raw.length - 1);
     if (lines.slice(startLine, endLine + 1).some((l) => IGNORE_LINE.test(l)))
@@ -114,6 +117,9 @@ function codeParagraphs(source) {
     // Skip identifiers, paths, imports and other non-prose strings.
     if (!/\s/.test(text)) continue;
     if (/^[@./]/.test(text)) continue;
+    // Coordinate and path data (SVG `d="M12 .5A11.5 ..."`) is not prose.
+    const letters = (text.match(/[a-zA-Z]/g) ?? []).length;
+    if (letters / text.length < 0.4) continue;
     // Skip CSS blocks written as template literals (styled-jsx, emotion).
     if (/(^|\n)\s*[-a-zA-Z]+\s*:\s*[^;\n{}]+;/.test(text)) continue;
 
@@ -226,8 +232,10 @@ function jsxTextParagraphs(source) {
       .replace(/&rsquo;|&apos;|&#39;/g, "'")
       .replace(/&[a-z]+;|&#\d+;/g, " ");
     if (/[=;{}()[\]`$<>]/.test(text)) return "";
+    // Property signatures and list items in object/type bodies are not prose.
+    if (/[,:]\s*$/.test(text)) return "";
     const words = text.trim().split(/\s+/).filter((w) => /[a-zA-Z]/.test(w));
-    return words.length < 3 ? "" : text.trim();
+    return words.length < 2 ? "" : text.trim();
   });
   return groupLines(kept);
 }
