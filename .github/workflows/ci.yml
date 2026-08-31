@@ -30,6 +30,11 @@ jobs:
         run: |
           python -m compileall pipeline tests
           python -m pytest -q
+      - name: Verify prose
+        run: |
+          npm run test:prose
+          npm run prose-check
+
       - name: Verify Next.js
         run: |
           npm run typecheck
