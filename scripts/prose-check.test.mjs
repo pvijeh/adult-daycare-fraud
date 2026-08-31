@@ -169,3 +169,19 @@ test("ignores coordinate and path data", () => {
   const source = 'export const icon = "M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.29-1.7-1.29-1.7-1.06-.72.08-.7.08-.7 1.17.08";';
   assert.deepEqual(check(source, "Icons.tsx"), []);
 });
+
+test("reads published html pages and skips script bodies", () => {
+  const source = [
+    "<html><body>",
+    "<script>const seamless = 1; // robust",
+    "</script>",
+    "<h1>How we built it</h1>",
+    "<p>",
+    "  A seamless, robust pipeline &mdash; really.",
+    "</p>",
+    "</body></html>",
+  ].join("\n");
+  const findings = check(source, "page.html");
+  assert.ok(findings.some((f) => f.message.includes('"seamless"') && f.line === 6));
+  assert.equal(findings.filter((f) => f.line < 4).length, 0);
+});

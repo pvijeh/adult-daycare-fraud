@@ -74,7 +74,7 @@
       "instead": "state the point directly"
     },
     {
-      "re": "\\b(seamless|seamlessly|robust|holistic|comprehensive|cutting-edge|state-of-the-art|game-?changer|revolutionize[sd]?|elevate[sd]?|harness(es|ed|ing)?|showcase[sd]?|foster(s|ed|ing)?|streamline[sd]?|unlock(s|ed|ing)?\\s+value)\\b",
+      "re": "\\b(seamless|seamlessly|robust|holistic|comprehensive|cutting-edge|state-of-the-art|game-?changer|revolutionize[sd]?|elevate[sd]?|harness(es|ed|ing)?\\s+(the|its|our|their)|showcase[sd]?|foster(s|ed|ing)?|streamline[sd]?|unlock(s|ed|ing)?\\s+value)\\b",
       "why": "marketing filler",
       "instead": "delete, or give the specific benefit"
     },

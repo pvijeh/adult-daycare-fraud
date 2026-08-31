@@ -16,6 +16,8 @@ const rules = JSON.parse(readFileSync(join(here, "prose-rules.json"), "utf8"));
 
 const CODE_EXT = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"]);
 const MARKDOWN_EXT = new Set([".md", ".mdx"]);
+const HTML_EXT = new Set([".html", ".htm"]);
+const BLOCK_TAG = /<\s*(p|li|h[1-6]|td|th|tr|div|section|article|blockquote|figcaption|dt|dd)[\s>]/i;
 const SKIP_DIR = new Set([
   "node_modules",
   ".git",
@@ -45,7 +47,11 @@ function walk(path, out) {
       if (SKIP_DIR.has(entry)) continue;
       walk(join(path, entry), out);
     }
-  } else if (CODE_EXT.has(extname(path)) || MARKDOWN_EXT.has(extname(path))) {
+  } else if (
+    CODE_EXT.has(extname(path)) ||
+    MARKDOWN_EXT.has(extname(path)) ||
+    HTML_EXT.has(extname(path))
+  ) {
     out.push(path);
   }
   return out;
@@ -240,10 +246,36 @@ function jsxTextParagraphs(source) {
   return groupLines(kept);
 }
 
+// Published HTML pages: script, style and svg bodies dropped, tags removed, and a
+// block-level tag starts a new paragraph.
+function htmlParagraphs(source) {
+  const blanked = source.replace(
+    /<(script|style|svg)[\s\S]*?<\/\1\s*>/gi,
+    // Keep the line count so reported line numbers stay right.
+    (match) => match.replace(/[^\n]/g, " "),
+  );
+  const breaks = new Set();
+  const kept = blanked.split("\n").map((line, i) => {
+    if (IGNORE_LINE.test(line)) return "";
+    if (BLOCK_TAG.test(line)) breaks.add(i);
+    return line
+      .replace(/<!--[\s\S]*?-->/g, " ")
+      .replace(/<[^>]*>/g, " ")
+      .replace(/&(nbsp|#160);/g, " ")
+      .replace(/&(rsquo|apos|#39);/g, "'")
+      .replace(/&(mdash|#8212);/g, "\u2014")
+      .replace(/&[a-z]+;|&#\d+;/g, " ")
+      .trim();
+  });
+  return groupLines(kept, breaks);
+}
+
 function paragraphs(source, file) {
   const ext = extname(file);
   const blocks = MARKDOWN_EXT.has(ext)
     ? markdownParagraphs(source)
+    : HTML_EXT.has(ext)
+    ? htmlParagraphs(source)
     : [
         ...codeParagraphs(source),
         ...(ext === ".tsx" || ext === ".jsx" ? jsxTextParagraphs(source) : []),
